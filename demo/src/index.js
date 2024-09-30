@@ -17,5 +17,5 @@ const config = {
     loadedManifest: 'https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json',
   }],
 };
-
+//https://t-pen.org/TPEN/project/7305/
 mirador.viewer(config, [...annotationPlugins]);

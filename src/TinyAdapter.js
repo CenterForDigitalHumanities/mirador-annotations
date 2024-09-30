@@ -5,17 +5,26 @@ export default class RerumAdapter {
     this.canvasId = canvasId;
     this.endpointUrl = endpointUrl;
     this.emptyAnnoPage = {
+      '@context': 'http://www.w3.org/ns/anno.jsonld',
       items: [],
       target: this.canvasId,
       type: 'AnnotationPage',
     };
     this.knownAnnoPage = undefined;
-    this.checkForAnnotationPage();
+    this.all();
   }
 
-  /** */
+  /**
+    * Create an Annotation by using the RERUM Sanbox /create endpoint.
+    * Add that Annotation into the AnnotationPage.  Update the AnnotationPage.
+    * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
+    * This prepares it for sequential alterations.
+    * If there is no existing AnnotationPage at the time of Annotation creation one must be created.
+    * @param annotation - An Annotation JSON object to be created
+    * @return The known AnnotationPage
+  */
   async create(annotation) {
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.checkForAnnotationPage();
+    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
       body: JSON.stringify(annotation),
       headers: {
@@ -30,9 +39,17 @@ export default class RerumAdapter {
     return this.knownAnnoPage;
   }
 
-  /** */
+  /**
+    * Update an Annotation by using the RERUM Sanbox /patch endpoint.
+    * Find that existing Annotation in the AnnotationPage.
+    * Update the Annotation in place, and also update the AnnotationPage.
+    * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
+    * This prepares it for sequential alterations.
+    * @param annotation - An Annotation JSON object to be updated, already containing it altered keys.
+    * @return The known AnnotationPage
+  */
   async update(annotation) {
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.checkForAnnotationPage();
+    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     if (!this.knownAnnoPage) return this.emptyAnnoPage;
     const origAnnoId = annotation['@id'] ?? annotation.id ?? 'unknown';
     if (!origAnnoId) return this.knownAnnoPage;
@@ -45,7 +62,6 @@ export default class RerumAdapter {
     })
       .then((resp) => resp.json())
       .catch((err) => this.knownAnnoPage);
-    // Note that the Annotation Page needs to be updated.  It has changed
     if (updatedAnnotation) {
       let i = 0;
       for await (const item of this.knownAnnoPage.items) {
@@ -61,10 +77,18 @@ export default class RerumAdapter {
     return this.knownAnnoPage;
   }
 
-  /** */
+  /**
+    * Delete an Annotation by using the RERUM Sanbox /delete endpoint.
+    * Find that existing Annotation in the AnnotationPage.
+    * Remove the Annotation, and also update the AnnotationPage.
+    * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
+    * This prepares it for sequential alterations.
+    * @param annoId - An Annotation URI
+    * @return The known AnnotationPage
+  */
   async delete(annoId) {
     if (!annoId) return this.emptyAnnoPage;
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.checkForAnnotationPage();
+    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     if (!this.knownAnnoPage) return this.emptyAnnoPage;
     return fetch(`${this.endpointUrl}/delete/${annoId}`, {
       method: 'DELETE',
@@ -88,7 +112,12 @@ export default class RerumAdapter {
       .catch((err) => this.knownAnnoPage);
   }
 
-  /** */
+  /**
+    * Get an Annotation out of the AnnotationPage 'items' array.
+    * Do not alter the array.
+    * @param annotation - An Annotation JSON object to be created
+    * @return The Annotation object or undefined
+  */
   async get(annoId) {
     const annotationPage = await this.all();
     return annotationPage.items.find((item) => {
@@ -97,27 +126,11 @@ export default class RerumAdapter {
     });
   }
 
-  /** */
+  /**
+    * Get the AnnotationPage containing all the Annotations.
+    * @return The AnnotationPage or an empty AnnotationPage object.
+  */
   async all() {
-    const query = {
-      '__rerum.history.next': { $exists: true, $size: 0 },
-      target: this.canvasId,
-      type: 'AnnotationPage',
-    };
-    return this.knownAnnoPage || fetch(`${this.endpointUrl}/query`, {
-      body: JSON.stringify(query),
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      method: 'POST',
-    })
-      .then((resp) => resp.json())
-      .then((arr) => arr[0])
-      .catch((err) => null);
-  }
-
-  /** */
-  async checkForAnnotationPage() {
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
       target: this.canvasId,
@@ -140,7 +153,11 @@ export default class RerumAdapter {
       .catch((err) => null);
   }
 
-  /** */
+  /**
+    * Update an AnnotationPage by using the RERUM Sanbox /patch endpoint.
+    * @param annoPage - An AnnotationPage JSON object to be created
+    * @return The known AnnotationPage
+  */
   async updateAnnoPage(annoPage) {
     return fetch(`${this.endpointUrl}/patch/`, {
       body: JSON.stringify(annoPage),
@@ -153,7 +170,11 @@ export default class RerumAdapter {
       .catch((err) => annoPage);
   }
 
-  /** */
+  /**
+    * Create an AnnotationPage by using the RERUM Sanbox /create endpoint.
+    * @param annoPage - An AnnotationPage JSON object to be created
+    * @return The known AnnotationPage
+  */
   async createAnnoPage(annoPage) {
     return fetch(`${this.endpointUrl}/create/`, {
       body: JSON.stringify(annoPage),
