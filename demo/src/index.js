@@ -18,5 +18,5 @@ const config = {
   }],
 };
 
-//https://t-pen.org/TPEN/manifest/6495
+// https://t-pen.org/TPEN/manifest/6495
 mirador.viewer(config, [...annotationPlugins]);
