@@ -1,7 +1,7 @@
 /** */
 export default class TinyAdapter {
   /** */
-  constructor(canvasId, endpointUrl = 'https://api.t-pen.org') {
+  constructor(canvasId, endpointUrl = 'https://tinydev.rerum.io') {
     this.canvasId = canvasId;
     this.endpointUrl = endpointUrl;
     this.emptyAnnoPage = {
