@@ -1,6 +1,6 @@
 import mirador from 'mirador/dist/es/src/index';
 import annotationPlugins from '../../src';
-import RerumAdapter from '../../src/RerumAdapter';
+import RerumAdapter from '../../src/TinyAdapter';
 
 const endpointUrl = 'https://tinydev.rerum.io';
 const config = {
