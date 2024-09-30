@@ -14,9 +14,9 @@ const config = {
     sideBarOpenByDefault: true,
   },
   windows: [{
-    loadedManifest: 'https://t-pen.org/TPEN/manifest/6495',
+    loadedManifest: 'https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json',
   }],
 };
 
-//https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json
+//https://t-pen.org/TPEN/manifest/6495
 mirador.viewer(config, [...annotationPlugins]);
