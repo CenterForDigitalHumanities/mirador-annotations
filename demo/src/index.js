@@ -1,11 +1,11 @@
 import mirador from 'mirador/dist/es/src/index';
 import annotationPlugins from '../../src';
-import RerumAdapter from '../../src/TinyAdapter';
+import TinyAdapter from '../../src/TinyAdapter';
 
 const endpointUrl = 'https://tinydev.rerum.io';
 const config = {
   annotation: {
-    adapter: (canvasId) => new RerumAdapter(canvasId, endpointUrl),
+    adapter: (canvasId) => new TinyAdapter(canvasId, endpointUrl),
     exportLocalStorageAnnotations: false, // display annotation JSON export button
   },
   id: 'demo',
@@ -14,8 +14,9 @@ const config = {
     sideBarOpenByDefault: true,
   },
   windows: [{
-    loadedManifest: 'https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json',
+    loadedManifest: 'https://t-pen.org/TPEN/manifest/6495',
   }],
 };
-//https://t-pen.org/TPEN/project/7305/
+
+//https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json
 mirador.viewer(config, [...annotationPlugins]);
