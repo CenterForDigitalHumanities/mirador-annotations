@@ -65,7 +65,7 @@ export default class TinyAdapter {
     const origAnnoId = annotation['@id'] ?? annotation.id ?? 'unknown';
     if (!origAnnoId) return this.knownAnnoPage;
     // eslint-disable-next-line no-param-reassign
-    annotation.creator = "Tiny Mirador";
+    annotation.creator = 'Tiny Mirador';
     const updatedAnnotation = await fetch(`${this.endpointUrl}/patch/`, {
       body: JSON.stringify(annotation),
       headers: {
