@@ -6,6 +6,7 @@ export default class RerumAdapter {
     this.endpointUrl = endpointUrl;
     this.emptyAnnoPage = {
       '@context': 'http://www.w3.org/ns/anno.jsonld',
+      creator: 'Tiny Mirador',
       items: [],
       target: this.canvasId,
       type: 'AnnotationPage',
@@ -25,6 +26,10 @@ export default class RerumAdapter {
   */
   async create(annotation) {
     if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
+    if (!this.knownAnnoPage) return this.emptyAnnoPage;
+    if (!annotation) return this.knownAnnoPage;
+    // eslint-disable-next-line no-param-reassign
+    annotation.creator = 'Tiny Mirador';
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
       body: JSON.stringify(annotation),
       headers: {
@@ -33,6 +38,11 @@ export default class RerumAdapter {
       method: 'POST',
     })
       .then((resp) => resp.json())
+      .then((created) => {
+        // eslint-disable-next-line no-param-reassign
+        delete created.new_obj_state;
+        return created;
+      })
       .catch((err) => null);
     if (createdAnnotation) this.knownAnnoPage.items.push(createdAnnotation);
     this.knownAnnoPage = this.knownAnnoPage['@id'] ? await this.updateAnnoPage(this.knownAnnoPage) : await this.createAnnoPage(this.knownAnnoPage);
@@ -45,14 +55,17 @@ export default class RerumAdapter {
     * Update the Annotation in place, and also update the AnnotationPage.
     * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
     * This prepares it for sequential alterations.
-    * @param annotation - An Annotation JSON object to be updated, already containing it altered keys.
+    * @param annotation - An Annotation JSON object to be updated.  Contains altered keys.
     * @return The known AnnotationPage
   */
   async update(annotation) {
     if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     if (!this.knownAnnoPage) return this.emptyAnnoPage;
+    if (!annotation) return this.knownAnnoPage;
     const origAnnoId = annotation['@id'] ?? annotation.id ?? 'unknown';
     if (!origAnnoId) return this.knownAnnoPage;
+    // eslint-disable-next-line no-param-reassign
+    annotation.creator = "Tiny Mirador";
     const updatedAnnotation = await fetch(`${this.endpointUrl}/patch/`, {
       body: JSON.stringify(annotation),
       headers: {
@@ -61,6 +74,11 @@ export default class RerumAdapter {
       method: 'PATCH',
     })
       .then((resp) => resp.json())
+      .then((updated) => {
+        // eslint-disable-next-line no-param-reassign
+        delete updated.new_obj_state;
+        return updated;
+      })
       .catch((err) => this.knownAnnoPage);
     if (updatedAnnotation) {
       let i = 0;
@@ -159,6 +177,7 @@ export default class RerumAdapter {
     * @return The known AnnotationPage
   */
   async updateAnnoPage(annoPage) {
+    if (!annoPage) return this.emptyAnnoPage;
     return fetch(`${this.endpointUrl}/patch/`, {
       body: JSON.stringify(annoPage),
       headers: {
@@ -176,6 +195,7 @@ export default class RerumAdapter {
     * @return The known AnnotationPage
   */
   async createAnnoPage(annoPage) {
+    if (!annoPage) return this.emptyAnnoPage;
     return fetch(`${this.endpointUrl}/create/`, {
       body: JSON.stringify(annoPage),
       headers: {
