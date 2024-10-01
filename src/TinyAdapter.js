@@ -43,7 +43,7 @@ export default class TinyAdapter {
         delete created.new_obj_state;
         return created;
       })
-      .catch((err) => null);
+      .catch((err) => undefined);
     if (createdAnnotation) this.knownAnnoPage.items.push(createdAnnotation);
     this.knownAnnoPage = this.knownAnnoPage['@id'] ? await this.updateAnnoPage(this.knownAnnoPage) : await this.createAnnoPage(this.knownAnnoPage);
     return this.knownAnnoPage;
@@ -169,7 +169,7 @@ export default class TinyAdapter {
         else this.knownAnnoPage = this.emptyAnnoPage;
         return this.knownAnnoPage;
       })
-      .catch((err) => null);
+      .catch((err) => undefined);
   }
 
   /**
