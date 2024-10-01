@@ -2,6 +2,7 @@
 export default class TinyAdapter {
   /** */
   constructor(canvasId, endpointUrl = 'https://tinydev.rerum.io') {
+    this.annotationPageId = undefined;
     this.canvasId = canvasId;
     this.endpointUrl = endpointUrl;
     this.emptyAnnoPage = {
@@ -45,6 +46,8 @@ export default class TinyAdapter {
     if (createdAnnotation) {
       knownAnnoPage.items.push(createdAnnotation);
       knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+      this.annotationPageId = knownAnnoPage['@id'];
+      knownAnnoPage.id = this.annotationPageId;
     }
     return knownAnnoPage;
   }
@@ -89,6 +92,8 @@ export default class TinyAdapter {
         if (itemid === origAnnoId) {
           knownAnnoPage.items[i] = updatedAnnotation;
           knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
+          this.annotationPageId = knownAnnoPage['@id'];
+          knownAnnoPage.id = this.annotationPageId;
           break;
         }
         i += 1;
@@ -122,6 +127,8 @@ export default class TinyAdapter {
               knownAnnoPage.items = knownAnnoPage.items.splice(i, 1);
               // eslint-disable-next-line no-await-in-loop
               knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
+              this.annotationPageId = knownAnnoPage['@id'];
+              knownAnnoPage.id = this.annotationPageId;
               break;
             }
             i += 1;
@@ -169,8 +176,12 @@ export default class TinyAdapter {
       .then((resp) => resp.json())
       .then((arr) => {
         let knownAnnoPage;
-        // eslint-disable-next-line prefer-destructuring
-        if (arr.length) knownAnnoPage = arr[0];
+        if (arr.length) {
+          // eslint-disable-next-line prefer-destructuring
+          knownAnnoPage = arr[0];
+          this.annotationPageId = knownAnnoPage['@id'];
+          knownAnnoPage.id = this.annotationPageId;
+        }
         return knownAnnoPage;
       })
       .catch((err) => err);
