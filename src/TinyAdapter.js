@@ -42,8 +42,10 @@ export default class TinyAdapter {
         return created;
       })
       .catch((err) => undefined);
-    if (createdAnnotation) knownAnnoPage.items.push(createdAnnotation);
-    knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    if (createdAnnotation) {
+      knownAnnoPage.items.push(createdAnnotation);
+      knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    }
     return knownAnnoPage;
   }
 
