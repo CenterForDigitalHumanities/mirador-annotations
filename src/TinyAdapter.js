@@ -50,7 +50,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Update an Annotation by using the RERUM Sanbox /patch endpoint.
+    * Update an Annotation by using the RERUM Sanbox /update endpoint.
     * Find that existing Annotation in the AnnotationPage.
     * Update the Annotation in place, and also update the AnnotationPage.
     * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
@@ -64,14 +64,18 @@ export default class TinyAdapter {
     if (!annotation) return this.knownAnnoPage;
     const origAnnoId = annotation['@id'] ?? annotation.id;
     if (!origAnnoId) return this.knownAnnoPage;
+    if (!origAnnoId.includes('store.rerum.io/v1/id/')) {
+      // This is actually just a new Annotation that needs to get added in.  Do create instead.
+      return this.create(annotation);
+    }
     // eslint-disable-next-line no-param-reassign
     annotation.creator = 'Tiny Mirador';
-    const updatedAnnotation = await fetch(`${this.endpointUrl}/patch/`, {
+    const updatedAnnotation = await fetch(`${this.endpointUrl}/update`, {
       body: JSON.stringify(annotation),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
-      method: 'PATCH',
+      method: 'PUT',
     })
       .then((resp) => resp.json())
       .then((updated) => {
@@ -174,18 +178,18 @@ export default class TinyAdapter {
   }
 
   /**
-    * Update an AnnotationPage by using the RERUM Sanbox /patch endpoint.
+    * Update an AnnotationPage by using the RERUM Sanbox /update endpoint.
     * @param annoPage - An AnnotationPage JSON object to be created
     * @return The known AnnotationPage
   */
   async updateAnnoPage(annoPage) {
     if (!annoPage) return this.knownAnnoPage;
-    return fetch(`${this.endpointUrl}/patch/`, {
+    return fetch(`${this.endpointUrl}/update`, {
       body: JSON.stringify(annoPage),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
-      method: 'PATCH',
+      method: 'PUT',
     })
       .then((resp) => resp.json())
       .then((updated) => {
@@ -203,7 +207,7 @@ export default class TinyAdapter {
   */
   async createAnnoPage(annoPage) {
     if (!annoPage) return this.knownAnnoPage;
-    return fetch(`${this.endpointUrl}/create/`, {
+    return fetch(`${this.endpointUrl}/create`, {
       body: JSON.stringify(annoPage),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
