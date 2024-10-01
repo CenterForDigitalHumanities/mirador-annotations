@@ -188,6 +188,11 @@ export default class TinyAdapter {
       method: 'PATCH',
     })
       .then((resp) => resp.json())
+      .then((updated) => {
+        // eslint-disable-next-line no-param-reassign
+        delete updated.new_obj_state;
+        return updated;
+      })
       .catch((err) => annoPage);
   }
 
@@ -206,6 +211,11 @@ export default class TinyAdapter {
       method: 'POST',
     })
       .then((resp) => resp.json())
+      .then((created) => {
+        // eslint-disable-next-line no-param-reassign
+        delete created.new_obj_state;
+        return created;
+      })
       .catch((err) => annoPage);
   }
 }
