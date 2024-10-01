@@ -184,6 +184,8 @@ export default class TinyAdapter {
   */
   async updateAnnoPage(annoPage) {
     if (!annoPage) return this.knownAnnoPage;
+    // eslint-disable-next-line no-param-reassign
+    annoPage.creator = 'Tiny Mirador';
     return fetch(`${this.endpointUrl}/update`, {
       body: JSON.stringify(annoPage),
       headers: {
@@ -207,6 +209,8 @@ export default class TinyAdapter {
   */
   async createAnnoPage(annoPage) {
     if (!annoPage) return this.knownAnnoPage;
+    // eslint-disable-next-line no-param-reassign
+    annoPage.creator = 'Tiny Mirador';
     return fetch(`${this.endpointUrl}/create`, {
       body: JSON.stringify(annoPage),
       headers: {
