@@ -137,6 +137,7 @@ export default class TinyAdapter {
     * @return The Annotation object or undefined
   */
   async get(annoId) {
+    if (!annoId) return undefined;
     const annotationPage = await this.all();
     return annotationPage.items.find((item) => {
       const itemid = item.id ?? item['@id'] ?? 'unknown';
