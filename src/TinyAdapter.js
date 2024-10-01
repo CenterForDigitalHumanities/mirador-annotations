@@ -11,8 +11,6 @@ export default class TinyAdapter {
       target: this.canvasId,
       type: 'AnnotationPage',
     };
-    this.knownAnnoPage = undefined;
-    this.all();
   }
 
   /**
@@ -25,9 +23,9 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async create(annotation) {
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
-    if (!this.knownAnnoPage) return this.emptyAnnoPage;
-    if (!annotation) return this.knownAnnoPage;
+    let knownAnnoPage = await this.all();
+    if (!knownAnnoPage) knownAnnoPage = this.emptyAnnoPage;
+    if (!annotation) return knownAnnoPage;
     // eslint-disable-next-line no-param-reassign
     annotation.creator = 'Tiny Mirador';
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
@@ -44,9 +42,9 @@ export default class TinyAdapter {
         return created;
       })
       .catch((err) => undefined);
-    if (createdAnnotation) this.knownAnnoPage.items.push(createdAnnotation);
-    this.knownAnnoPage = this.knownAnnoPage['@id'] ? await this.updateAnnoPage(this.knownAnnoPage) : await this.createAnnoPage(this.knownAnnoPage);
-    return this.knownAnnoPage;
+    if (createdAnnotation) knownAnnoPage.items.push(createdAnnotation);
+    knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    return knownAnnoPage;
   }
 
   /**
@@ -59,15 +57,13 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async update(annotation) {
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
-    if (!this.knownAnnoPage) return this.emptyAnnoPage;
-    if (!annotation) return this.knownAnnoPage;
+    let knownAnnoPage = await this.all();
+    if (!knownAnnoPage) return null;
+    if (!annotation) return knownAnnoPage;
     const origAnnoId = annotation['@id'] ?? annotation.id;
-    if (!origAnnoId) return this.knownAnnoPage;
-    if (!origAnnoId.includes('store.rerum.io/v1/id/')) {
-      // This is actually just a new Annotation that needs to get added in.  Do create instead.
-      return this.create(annotation);
-    }
+    if (!origAnnoId) return null;
+    // no no no.  Why didn't you create?
+    if (!origAnnoId.includes('store.rerum.io/v1/id/')) return null;
     // eslint-disable-next-line no-param-reassign
     annotation.creator = 'Tiny Mirador';
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update`, {
@@ -86,17 +82,17 @@ export default class TinyAdapter {
       .catch((err) => undefined);
     if (updatedAnnotation) {
       let i = 0;
-      for await (const item of this.knownAnnoPage.items) {
+      for await (const item of knownAnnoPage.items) {
         const itemid = item.id ?? item['@id'] ?? 'unknown';
         if (itemid === origAnnoId) {
-          this.knownAnnoPage.items[i] = updatedAnnotation;
-          this.knownAnnoPage = await this.updateAnnoPage(this.knownAnnoPage);
+          knownAnnoPage.items[i] = updatedAnnotation;
+          knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
           break;
         }
         i += 1;
       }
     }
-    return this.knownAnnoPage;
+    return knownAnnoPage;
   }
 
   /**
@@ -109,29 +105,29 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async delete(annoId) {
-    if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
-    if (!this.knownAnnoPage) return this.emptyAnnoPage;
-    if (!annoId) return this.knownAnnoPage;
+    let knownAnnoPage = await this.all();
+    if (!knownAnnoPage) return this.emptyAnnoPage;
+    if (!annoId) return knownAnnoPage;
     return fetch(`${this.endpointUrl}/delete/${annoId}`, {
       method: 'DELETE',
     })
       .then(async (resp) => {
         if (resp.ok) {
           let i = 0;
-          for (const item of this.knownAnnoPage.items) {
+          for (const item of knownAnnoPage.items) {
             const itemid = item.id ?? item['@id'] ?? 'unknown';
             if (itemid === annoId) {
-              this.knownAnnoPage.items = this.knownAnnoPage.items.splice(i, 1);
+              knownAnnoPage.items = knownAnnoPage.items.splice(i, 1);
               // eslint-disable-next-line no-await-in-loop
-              this.knownAnnoPage = await this.updateAnnoPage(this.knownAnnoPage);
+              knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
               break;
             }
             i += 1;
           }
         }
-        return this.knownAnnoPage;
+        return knownAnnoPage;
       })
-      .catch((err) => this.knownAnnoPage);
+      .catch((err) => knownAnnoPage);
   }
 
   /**
@@ -141,8 +137,9 @@ export default class TinyAdapter {
     * @return The Annotation object or undefined
   */
   async get(annoId) {
-    if (!annoId) return undefined;
+    if (!annoId) return null;
     const annotationPage = await this.all();
+    if (!annotationPage) return null;
     return annotationPage.items.find((item) => {
       const itemid = item.id ?? item['@id'] ?? 'unknown';
       return itemid === annoId;
@@ -154,14 +151,13 @@ export default class TinyAdapter {
     * @return The AnnotationPage or an empty AnnotationPage object.
   */
   async all() {
-    if (this.knownAnnoPage) return this.knownAnnoPage;
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
       creator: 'Tiny Mirador',
       target: this.canvasId,
       type: 'AnnotationPage',
     };
-    return fetch(`${this.endpointUrl}/query`, {
+    const annoPage = await fetch(`${this.endpointUrl}/query`, {
       body: JSON.stringify(query),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
@@ -170,12 +166,13 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((arr) => {
+        let knownAnnoPage;
         // eslint-disable-next-line prefer-destructuring
-        if (arr.length) this.knownAnnoPage = arr[0];
-        else this.knownAnnoPage = this.emptyAnnoPage;
-        return this.knownAnnoPage;
+        if (arr.length) knownAnnoPage = arr[0];
+        return knownAnnoPage;
       })
       .catch((err) => err);
+    return annoPage;
   }
 
   /**
@@ -184,7 +181,7 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async updateAnnoPage(annoPage) {
-    if (!annoPage) return this.knownAnnoPage;
+    if (!annoPage) return null;
     // eslint-disable-next-line no-param-reassign
     annoPage.creator = 'Tiny Mirador';
     return fetch(`${this.endpointUrl}/update`, {
@@ -209,7 +206,7 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async createAnnoPage(annoPage) {
-    if (!annoPage) return this.knownAnnoPage;
+    if (!annoPage) return null;
     // eslint-disable-next-line no-param-reassign
     annoPage.creator = 'Tiny Mirador';
     return fetch(`${this.endpointUrl}/create`, {
