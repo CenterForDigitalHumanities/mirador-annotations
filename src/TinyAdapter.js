@@ -1,4 +1,6 @@
-/** */
+/**
+  
+ */
 export default class TinyAdapter {
   /** */
   constructor(canvasId, endpointUrl = 'https://tinydev.rerum.io') {
@@ -117,7 +119,7 @@ export default class TinyAdapter {
           for (const item of this.knownAnnoPage.items) {
             const itemid = item.id ?? item['@id'] ?? 'unknown';
             if (itemid === annoId) {
-              this.knownAnnoPage.items = this.knownAnnoPage.items.splice[i, 1];
+              this.knownAnnoPage.items = this.knownAnnoPage.items.splice(i, 1);
               // eslint-disable-next-line no-await-in-loop
               this.knownAnnoPage = await this.updateAnnoPage(this.knownAnnoPage);
               break;
