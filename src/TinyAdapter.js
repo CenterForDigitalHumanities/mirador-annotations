@@ -151,6 +151,7 @@ export default class TinyAdapter {
   async all() {
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
+      creator: 'Tiny Mirador',
       target: this.canvasId,
       type: 'AnnotationPage',
     };
