@@ -154,6 +154,7 @@ export default class TinyAdapter {
     * @return The AnnotationPage or an empty AnnotationPage object.
   */
   async all() {
+    if (this.knownAnnoPage) return this.knownAnnoPage;
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
       creator: 'Tiny Mirador',
