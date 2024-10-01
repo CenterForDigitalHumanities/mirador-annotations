@@ -79,7 +79,7 @@ export default class TinyAdapter {
         delete updated.new_obj_state;
         return updated;
       })
-      .catch((err) => this.knownAnnoPage);
+      .catch((err) => undefined);
     if (updatedAnnotation) {
       let i = 0;
       for await (const item of this.knownAnnoPage.items) {
@@ -170,7 +170,7 @@ export default class TinyAdapter {
         else this.knownAnnoPage = this.emptyAnnoPage;
         return this.knownAnnoPage;
       })
-      .catch((err) => undefined);
+      .catch((err) => err);
   }
 
   /**
