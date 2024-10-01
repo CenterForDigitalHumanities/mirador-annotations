@@ -1,6 +1,4 @@
-/**
-  
- */
+/** */
 export default class TinyAdapter {
   /** */
   constructor(canvasId, endpointUrl = 'https://tinydev.rerum.io') {
@@ -64,7 +62,7 @@ export default class TinyAdapter {
     if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     if (!this.knownAnnoPage) return this.emptyAnnoPage;
     if (!annotation) return this.knownAnnoPage;
-    const origAnnoId = annotation['@id'] ?? annotation.id ?? 'unknown';
+    const origAnnoId = annotation['@id'] ?? annotation.id;
     if (!origAnnoId) return this.knownAnnoPage;
     // eslint-disable-next-line no-param-reassign
     annotation.creator = 'Tiny Mirador';
@@ -107,9 +105,9 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async delete(annoId) {
-    if (!annoId) return this.emptyAnnoPage;
     if (!this.knownAnnoPage) this.knownAnnoPage = await this.all();
     if (!this.knownAnnoPage) return this.emptyAnnoPage;
+    if (!annoId) return this.knownAnnoPage;
     return fetch(`${this.endpointUrl}/delete/${annoId}`, {
       method: 'DELETE',
     })
@@ -179,7 +177,7 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async updateAnnoPage(annoPage) {
-    if (!annoPage) return this.emptyAnnoPage;
+    if (!annoPage) return this.knownAnnoPage;
     return fetch(`${this.endpointUrl}/patch/`, {
       body: JSON.stringify(annoPage),
       headers: {
@@ -197,7 +195,7 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async createAnnoPage(annoPage) {
-    if (!annoPage) return this.emptyAnnoPage;
+    if (!annoPage) return this.knownAnnoPage;
     return fetch(`${this.endpointUrl}/create/`, {
       body: JSON.stringify(annoPage),
       headers: {

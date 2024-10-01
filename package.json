@@ -1,7 +1,7 @@
 {
-  "name": "Tiny Mirador",
-  "version": "0.0.1",
-  "description": "An instance of Mirador using the TinyThings API for creating Annotations.",
+  "name": "mirador-annotations",
+  "version": "0.5.0",
+  "description": "mirador-annotations React component",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
@@ -72,15 +72,11 @@
     "react-dom": "^17.0",
     "uuid": "^8.2.0"
   },
-  "author": "thehabes",
+  "author": "",
   "homepage": "",
   "license": "Apache-2.0",
-  "repository": "https://github.com/CenterForDigitalHumanities/mirador-annotations/",
+  "repository": "",
   "keywords": [
-    "mirador",
-    "rerum",
-    "annotation",
-    "tpen",
-    "TPEN3"
+    "react-component"
   ]
 }
