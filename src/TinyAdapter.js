@@ -36,11 +36,10 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((created) => {
-        // eslint-disable-next-line no-param-reassign
-        delete created.new_obj_state;
-        // eslint-disable-next-line no-param-reassign
-        created.id = created['@id'];
-        return created;
+        const returnValue = created;
+        delete returnValue.new_obj_state;
+        returnValue.id = returnValue['@id'];
+        return returnValue;
       })
       .catch((err) => undefined);
     if (createdAnnotation) knownAnnoPage.items.push(createdAnnotation);
@@ -73,11 +72,10 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((updated) => {
-        // eslint-disable-next-line no-param-reassign
-        delete updated.new_obj_state;
-        // eslint-disable-next-line no-param-reassign
-        updated.id = updated['@id'];
-        return updated;
+        const returnValue = updated;
+        delete returnValue.new_obj_state;
+        returnValue.id = returnValue['@id'];
+        return returnValue;
       })
       .catch((err) => undefined);
     if (updatedAnnotation) {
@@ -106,9 +104,8 @@ export default class TinyAdapter {
   */
   async delete(annoId) {
     let knownAnnoPage = await this.all();
-    if (!knownAnnoPage) return this.emptyAnnoPage;
+    if (!knownAnnoPage) return undefined;
     if (!annoId) return knownAnnoPage;
-    // eslint-disable-next-line no-param-reassign
     const hashId = annoId.split('/').pop();
     return fetch(`${this.endpointUrl}/delete/${hashId}`, {
       method: 'DELETE',
@@ -194,9 +191,9 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((updated) => {
-        // eslint-disable-next-line no-param-reassign
-        delete updated.new_obj_state;
-        return updated;
+        const returnValue = updated;
+        delete returnValue.new_obj_state;
+        return returnValue;
       })
       .catch((err) => annoPage);
   }
@@ -217,9 +214,9 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((created) => {
-        // eslint-disable-next-line no-param-reassign
-        delete created.new_obj_state;
-        return created;
+        const returnValue = created;
+        delete returnValue.new_obj_state;
+        return returnValue;
       })
       .catch((err) => annoPage);
   }
