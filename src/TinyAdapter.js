@@ -108,7 +108,9 @@ export default class TinyAdapter {
     let knownAnnoPage = await this.all();
     if (!knownAnnoPage) return this.emptyAnnoPage;
     if (!annoId) return knownAnnoPage;
-    return fetch(`${this.endpointUrl}/delete/${annoId}`, {
+    // eslint-disable-next-line no-param-reassign
+    const hashId = annoId.split('/').pop();
+    return fetch(`${this.endpointUrl}/delete/${hashId}`, {
       method: 'DELETE',
     })
       .then(async (resp) => {
