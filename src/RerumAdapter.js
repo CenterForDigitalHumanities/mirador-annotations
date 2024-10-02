@@ -62,8 +62,10 @@ export default class RerumAdapter {
         return returnValue;
       })
       .catch((err) => undefined);
-    if (createdAnnotation) knownAnnoPage.items.push(createdAnnotation);
-    knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    if (createdAnnotation) {
+      knownAnnoPage.items.push(createdAnnotation);
+      knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    }
     return knownAnnoPage;
   }
 
@@ -78,8 +80,13 @@ export default class RerumAdapter {
   */
   async update(annotation) {
     let knownAnnoPage = await this.all();
+    if (!knownAnnoPage) return undefined;
     const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
+    // eslint-disable-next-line no-param-reassign
+    annotation['@id'] = origAnnoId;
+    // eslint-disable-next-line no-param-reassign
+    annotation['@context'] = 'http://www.w3.org/ns/anno.jsonld';
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
       body: JSON.stringify(this.#prepareForRerum(annotation)),
       headers: {
