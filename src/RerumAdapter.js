@@ -1,18 +1,18 @@
 const ENDPOINT = 'https://tinydev.rerum.io';
 const CREATOR = 'TinyMirador <https://github.com/ProjectMirador/mirador-annotations/blob/master/src/RerumAdapter.js>';
 
-/** 
+/**
  * Adds a RERUM adapter to Mirador for publishing and consuming annotations.
  * @module RerumAdapter
  * @docs https://centerfordigitalhumanities.github.io/blog/mirador-rerum-adapter/ Explains how to modify this adapter for your own use
 */
 export default class RerumAdapter {
-
+  /** */
   #ensureCreator(annotation) {
-    return Object.assign({ creator: this.creator },annotation);
+    return { creator: this.creator, ...annotation };
   }
 
-  /** 
+  /**
     * @param {String} canvasId - (passed in from Mirador) The URI of the canvas to which the annotations are attached
     * @param {String} endpointUrl - The URL of the RERUM endpoint (default: 'https://tinydev.rerum.io')
     * @param {String} creator - The creator of the annotations
@@ -91,9 +91,7 @@ export default class RerumAdapter {
       })
       .catch((err) => undefined);
     if (updatedAnnotation) {
-      knownAnnoPage.items = knownAnnoPage.items.map(item => {
-      return (item.id ?? item['@id']) === origAnnoId ? updatedAnnotation : item;
-      });
+      knownAnnoPage.items = knownAnnoPage.items.map((item) => ((item.id ?? item['@id']) === origAnnoId ? updatedAnnotation : item));
       knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
     }
     return knownAnnoPage;
@@ -117,8 +115,8 @@ export default class RerumAdapter {
       method: 'DELETE',
     })
       .then(async (resp) => {
-        if(!resp.ok) throw new Error(`Failed to delete ${annoId}`);
-        knownAnnoPage.items = knownAnnoPage.items.filter(item => {
+        if (!resp.ok) throw new Error(`Failed to delete ${annoId}`);
+        knownAnnoPage.items = knownAnnoPage.items.filter((item) => {
           const itemid = item.id ?? item['@id'];
           return itemid !== annoId;
         });
