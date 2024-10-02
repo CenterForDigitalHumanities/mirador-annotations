@@ -124,19 +124,12 @@ export default class RerumAdapter {
       method: 'DELETE',
     })
       .then(async (resp) => {
-        if (resp.ok) {
-          let i = 0;
-          for (const item of knownAnnoPage.items) {
-            const itemid = item.id ?? item['@id'] ?? 'unknown';
-            if (itemid === annoId) {
-              knownAnnoPage.items = knownAnnoPage.items.splice(i, 1);
-              // eslint-disable-next-line no-await-in-loop
-              knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
-              break;
-            }
-            i += 1;
-          }
-        }
+        if(!resp.ok) throw new Error(`Failed to delete ${annoId}`);
+        knownAnnoPage.items = knownAnnoPage.items.filter(item => {
+          const itemid = item.id ?? item['@id'];
+          return itemid !== annoId;
+        });
+        knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
         return knownAnnoPage;
       })
       .catch((err) => knownAnnoPage);
