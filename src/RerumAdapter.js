@@ -1,12 +1,29 @@
-/** */
-export default class TinyAdapter {
-  /** */
-  constructor(canvasId, endpointUrl = 'https://tinydev.rerum.io') {
+const ENDPOINT = 'https://tinydev.rerum.io';
+const CREATOR = 'TinyMirador <https://github.com/ProjectMirador/mirador-annotations/blob/master/src/RerumAdapter.js>';
+
+/** 
+ * Adds a RERUM adapter to Mirador for publishing and consuming annotations.
+ * @module RerumAdapter
+ * @docs https://centerfordigitalhumanities.github.io/blog/mirador-rerum-adapter/ Explains how to modify this adapter for your own use
+*/
+export default class RerumAdapter {
+
+  #ensureCreator(annotation) {
+    return Object.assign({ creator: this.creator },annotation);
+  }
+
+  /** 
+    * @param {String} canvasId - (passed in from Mirador) The URI of the canvas to which the annotations are attached
+    * @param {String} endpointUrl - The URL of the RERUM endpoint (default: 'https://tinydev.rerum.io')
+    * @param {String} creator - The creator of the annotations
+  */
+  constructor(canvasId, endpointUrl = ENDPOINT, creator = CREATOR) {
+    this.creator = creator;
     this.canvasId = canvasId;
     this.endpointUrl = endpointUrl;
     this.emptyAnnoPage = {
       '@context': 'http://www.w3.org/ns/anno.jsonld',
-      creator: 'Tiny Mirador',
+      creator: this.creator,
       items: [],
       target: this.canvasId,
       type: 'AnnotationPage',
@@ -14,7 +31,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Create an Annotation by using the RERUM Sanbox /create endpoint.
+    * Create an Annotation by using the RERUM Sandbox /create endpoint.
     * Add that Annotation into the AnnotationPage.  Update the AnnotationPage.
     * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
     * This prepares it for sequential alterations.
@@ -25,10 +42,8 @@ export default class TinyAdapter {
   async create(annotation) {
     let knownAnnoPage = await this.all() || this.emptyAnnoPage;
     if (!annotation) return knownAnnoPage;
-    // eslint-disable-next-line no-param-reassign
-    annotation.creator = 'Tiny Mirador';
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
-      body: JSON.stringify(annotation),
+      body: JSON.stringify(this.#ensureCreator(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
@@ -48,7 +63,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Update an Annotation by using the RERUM Sanbox /update endpoint.
+    * Update an Annotation by using the RERUM Sandbox /update endpoint.
     * Find that existing Annotation in the AnnotationPage.
     * Update the Annotation in place, and also update the AnnotationPage.
     * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
@@ -62,7 +77,7 @@ export default class TinyAdapter {
     const origAnnoId = annotation['@id'] ?? annotation.id;
     if (!origAnnoId) return knownAnnoPage;
     // eslint-disable-next-line no-param-reassign
-    annotation.creator = 'Tiny Mirador';
+    annotation.creator = this.creator;
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
       body: JSON.stringify(annotation),
       headers: {
@@ -94,7 +109,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Delete an Annotation by using the RERUM Sanbox /delete endpoint.
+    * Delete an Annotation by using the RERUM Sandbox /delete endpoint.
     * Find that existing Annotation in the AnnotationPage.
     * Remove the Annotation, and also update the AnnotationPage.
     * Since RERUM does versioning, get the resulting AnnotationPage for its new id.
@@ -152,7 +167,7 @@ export default class TinyAdapter {
     let knownAnnoPage;
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
-      creator: 'Tiny Mirador',
+      creator: this.creator,
       target: this.canvasId,
       type: 'AnnotationPage',
     };
@@ -176,7 +191,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Update an AnnotationPage by using the RERUM Sanbox /update endpoint.
+    * Update an AnnotationPage by using the RERUM Sandbox /update endpoint.
     * @param annoPage - An AnnotationPage JSON object to be created
     * @return The known AnnotationPage
   */
@@ -199,7 +214,7 @@ export default class TinyAdapter {
   }
 
   /**
-    * Create an AnnotationPage by using the RERUM Sanbox /create endpoint.
+    * Create an AnnotationPage by using the RERUM Sandbox /create endpoint.
     * @param annoPage - An AnnotationPage JSON object to be created
     * @return The known AnnotationPage
   */
