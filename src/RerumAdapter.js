@@ -171,11 +171,8 @@ export default class RerumAdapter {
     })
       .then((resp) => resp.json())
       .then((arr) => {
-        if (arr.length) {
-          // eslint-disable-next-line prefer-destructuring
-          knownAnnoPage = arr[0];
-          knownAnnoPage.items.forEach((anno) => anno.id === anno['@id']);
-        } else knownAnnoPage = undefined;
+        knownAnnoPage = arr.shift();
+        knownAnnoPage?.items.forEach((anno) => anno.id === anno['@id']);
         return knownAnnoPage;
       })
       .catch((err) => err);
