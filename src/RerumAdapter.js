@@ -76,10 +76,8 @@ export default class RerumAdapter {
     if (!annotation) return knownAnnoPage;
     const origAnnoId = annotation['@id'] ?? annotation.id;
     if (!origAnnoId) return knownAnnoPage;
-    // eslint-disable-next-line no-param-reassign
-    annotation.creator = this.creator;
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
-      body: JSON.stringify(annotation),
+      body: JSON.stringify(this.#ensureCreator(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
