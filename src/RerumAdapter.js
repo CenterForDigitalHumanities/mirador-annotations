@@ -8,7 +8,7 @@ const CREATOR = 'TinyMirador <https://github.com/ProjectMirador/mirador-annotati
 */
 export default class RerumAdapter {
   /** */
-  #ensureCreator(annotation) {
+  ensureCreator(annotation) {
     return { creator: this.creator, ...annotation };
   }
 
@@ -43,7 +43,7 @@ export default class RerumAdapter {
     let knownAnnoPage = await this.all() || this.emptyAnnoPage;
     if (!annotation) return knownAnnoPage;
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
-      body: JSON.stringify(this.#ensureCreator(annotation)),
+      body: JSON.stringify(this.ensureCreator(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
@@ -57,8 +57,10 @@ export default class RerumAdapter {
         return returnValue;
       })
       .catch((err) => undefined);
-    if (createdAnnotation) knownAnnoPage.items.push(createdAnnotation);
-    knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    if (createdAnnotation) {
+      knownAnnoPage.items.push(createdAnnotation);
+      knownAnnoPage = knownAnnoPage['@id'] ? await this.updateAnnoPage(knownAnnoPage) : await this.createAnnoPage(knownAnnoPage);
+    }
     return knownAnnoPage;
   }
 
@@ -73,10 +75,11 @@ export default class RerumAdapter {
   */
   async update(annotation) {
     let knownAnnoPage = await this.all();
+    if (!knownAnnoPage) return undefined;
     const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
-      body: JSON.stringify(this.#ensureCreator(annotation)),
+      body: JSON.stringify(this.ensureCreator(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
