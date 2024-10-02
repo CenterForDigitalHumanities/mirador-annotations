@@ -7,8 +7,8 @@ export default class TinyAdapter {
     this.emptyAnnoPage = {
       '@context': 'http://www.w3.org/ns/anno.jsonld',
       creator: 'Tiny Mirador',
-      forCanvas: this.canvasId,
       items: [],
+      target: this.canvasId,
       type: 'AnnotationPage',
     };
   }
@@ -153,7 +153,7 @@ export default class TinyAdapter {
     const query = {
       '__rerum.history.next': { $exists: true, $size: 0 },
       creator: 'Tiny Mirador',
-      forCanvas: this.canvasId,
+      target: this.canvasId,
       type: 'AnnotationPage',
     };
     return fetch(`${this.endpointUrl}/query`, {
