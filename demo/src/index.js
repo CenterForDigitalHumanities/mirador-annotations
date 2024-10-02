@@ -1,12 +1,12 @@
 import mirador from 'mirador/dist/es/src/index';
 import annotationPlugins from '../../src';
-import TinyAdapter from '../../src/TinyAdapter';
+import RerumAdapter from '../../src/RerumAdapter';
 import LocalStorageAdapter from '../../src/LocalStorageAdapter';
 
 const endpointUrl = 'https://tinydev.rerum.io';
 const config = {
   annotation: {
-    adapter: (canvasId) => new TinyAdapter(canvasId, endpointUrl),
+    adapter: (canvasId) => new RerumAdapter(canvasId, endpointUrl),
     // adapter: (canvasId) => new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
     exportLocalStorageAnnotations: false, // display annotation JSON export button
   },
