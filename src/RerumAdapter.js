@@ -73,8 +73,7 @@ export default class RerumAdapter {
   */
   async update(annotation) {
     let knownAnnoPage = await this.all();
-    if (!annotation) return knownAnnoPage;
-    const origAnnoId = annotation['@id'] ?? annotation.id;
+    const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
       body: JSON.stringify(this.#ensureCreator(annotation)),
@@ -92,16 +91,10 @@ export default class RerumAdapter {
       })
       .catch((err) => undefined);
     if (updatedAnnotation) {
-      let i = 0;
-      for await (const item of knownAnnoPage.items) {
-        const itemid = item.id ?? item['@id'] ?? 'unknown';
-        if (itemid === origAnnoId) {
-          knownAnnoPage.items[i] = updatedAnnotation;
-          knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
-          break;
-        }
-        i += 1;
-      }
+      knownAnnoPage.items = knownAnnoPage.items.map(item => {
+      return (item.id ?? item['@id']) === origAnnoId ? updatedAnnotation : item;
+      });
+      knownAnnoPage = await this.updateAnnoPage(knownAnnoPage);
     }
     return knownAnnoPage;
   }
