@@ -8,8 +8,13 @@ const CREATOR = 'TinyMirador <https://github.com/ProjectMirador/mirador-annotati
 */
 export default class RerumAdapter {
   /** */
-  #ensureCreator(annotation) {
-    return { creator: this.creator, ...annotation };
+  #prepareForRerum(annotation) {
+    const forRerum = {
+      "@context": "http://www.w3.org/ns/anno.jsonld",
+      "@id": annotation.id,
+      creator: this.creator,
+    }
+    return Object.assign(forRerum, annotation);
   }
 
   /**
@@ -43,7 +48,7 @@ export default class RerumAdapter {
     let knownAnnoPage = await this.all() || this.emptyAnnoPage;
     if (!annotation) return knownAnnoPage;
     const createdAnnotation = await fetch(`${this.endpointUrl}/create`, {
-      body: JSON.stringify(this.#ensureCreator(annotation)),
+      body: JSON.stringify(this.#prepareForRerum(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
@@ -76,7 +81,7 @@ export default class RerumAdapter {
     const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
-      body: JSON.stringify(this.#ensureCreator(annotation)),
+      body: JSON.stringify(this.#prepareForRerum(annotation)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
