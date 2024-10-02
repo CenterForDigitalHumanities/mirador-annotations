@@ -23,7 +23,7 @@ export default class TinyAdapter {
     * @return The known AnnotationPage
   */
   async create(annotation) {
-    let knownAnnoPage = await this.all();
+    let knownAnnoPage = await this.all() || this.emptyAnnoPage;
     if (!annotation) return knownAnnoPage;
     // eslint-disable-next-line no-param-reassign
     annotation.creator = 'Tiny Mirador';
@@ -38,6 +38,8 @@ export default class TinyAdapter {
       .then((created) => {
         // eslint-disable-next-line no-param-reassign
         delete created.new_obj_state;
+        // eslint-disable-next-line no-param-reassign
+        created.id = created['@id'];
         return created;
       })
       .catch((err) => undefined);
@@ -73,6 +75,8 @@ export default class TinyAdapter {
       .then((updated) => {
         // eslint-disable-next-line no-param-reassign
         delete updated.new_obj_state;
+        // eslint-disable-next-line no-param-reassign
+        updated.id = updated['@id'];
         return updated;
       })
       .catch((err) => undefined);
@@ -162,9 +166,11 @@ export default class TinyAdapter {
     })
       .then((resp) => resp.json())
       .then((arr) => {
-        // eslint-disable-next-line prefer-destructuring
-        if (arr.length) knownAnnoPage = arr[0];
-        else knownAnnoPage = this.emptyAnnoPage;
+        if (arr.length) {
+          // eslint-disable-next-line prefer-destructuring
+          knownAnnoPage = arr[0];
+          knownAnnoPage.items.forEach((anno) => anno.id === anno['@id']);
+        } else knownAnnoPage = undefined;
         return knownAnnoPage;
       })
       .catch((err) => err);
