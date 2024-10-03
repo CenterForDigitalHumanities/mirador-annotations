@@ -6,7 +6,7 @@ import LocalStorageAdapter from '../../src/LocalStorageAdapter';
 const endpointUrl = 'https://tinydev.rerum.io';
 const config = {
   annotation: {
-    adapter: (canvasId) => new RerumAdapter(canvasId, endpointUrl),
+    adapter: (canvasId) => new RerumAdapter(canvasId),
     // adapter: (canvasId) => new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
     exportLocalStorageAnnotations: false, // display annotation JSON export button
   },
