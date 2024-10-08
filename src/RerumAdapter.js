@@ -83,12 +83,11 @@ export default class RerumAdapter {
     if (!knownAnnoPage) return undefined;
     const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
-    // eslint-disable-next-line no-param-reassign
-    annotation['@id'] = origAnnoId;
-    // eslint-disable-next-line no-param-reassign
-    annotation['@context'] = 'http://www.w3.org/ns/anno.jsonld';
+    const altered = annotation;
+    altered['@id'] = origAnnoId;
+    altered['@context'] = 'http://www.w3.org/ns/anno.jsonld';
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
-      body: JSON.stringify(this.prepareForRerum(annotation)),
+      body: JSON.stringify(this.prepareForRerum(altered)),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
