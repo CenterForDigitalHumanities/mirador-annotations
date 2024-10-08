@@ -78,14 +78,11 @@ export default class RerumAdapter {
     * @param data - An Annotation JSON object to be updated.  Contains altered keys.
     * @return The known AnnotationPage
   */
-  async update(data) {
+  async update(annotation) {
     let knownAnnoPage = await this.all();
     if (!knownAnnoPage) return undefined;
-    const origAnnoId = data?.id ?? data?.['@id'];
+    const origAnnoId = annotation?.id ?? annotation?.['@id'];
     if (!origAnnoId) return knownAnnoPage;
-    const annotation = data;
-    annotation['@id'] = origAnnoId;
-    annotation['@context'] = 'http://www.w3.org/ns/anno.jsonld';
     const updatedAnnotation = await fetch(`${this.endpointUrl}/update/`, {
       body: JSON.stringify(this.prepareForRerum(annotation)),
       headers: {
