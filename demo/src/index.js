@@ -16,7 +16,7 @@ const config = {
     sideBarOpenByDefault: true,
   },
   windows: [{
-    loadedManifest: 'https://iiif.harvardartmuseums.org/manifests/object/299843',
+    loadedManifest: 'https://iiif.biblissima.fr/chateauroux/B360446201_MS0005/manifest.json',
   }],
 };
 
