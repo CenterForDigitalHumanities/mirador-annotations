@@ -3,11 +3,10 @@ import annotationPlugins from '../../src';
 import LocalStorageAdapter from '../../src/LocalStorageAdapter';
 import RerumAdapter from '../../src/RerumAdapter';
 
-const endpointUrl = 'https://tinydev.rerum.io';
 const config = {
   annotation: {
     adapter: (canvasId) => new LocalStorageAdapter(`localStorage://?canvasId=${canvasId}`),
-    // adapter: (canvasId) => new RerumAdapter(canvasId), // use RERUM for persistent Annotations
+    // adapter: (canvasId) => new RerumAdapter(canvasId), // put Annotations online with RERUM
     exportLocalStorageAnnotations: false, // display annotation JSON export button
   },
   id: 'demo',
